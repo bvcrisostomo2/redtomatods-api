@@ -434,7 +434,7 @@ def paid_invoice(invoice_id):
 
 ######################################LOGIN######################################################################
 
-@app.route('/login/admin', methods=['GET','POST'])
+@app.route('/api/login/admin', methods=['GET','POST'])
 def login_admin():
     data = request.get_json()
 
@@ -452,7 +452,7 @@ def login_admin():
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-@app.route('/login', methods=['GET','POST'])
+@app.route('/api/login', methods=['GET','POST'])
 def login():
     auth = request.get_json()
 
@@ -468,8 +468,11 @@ def login():
         token = jwt.encode({'public_id' : client.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
         # resp = make_response()
         # resp.headers.extend({'x-access-token' : client_data['token']})
-
-        return jsonify({'token':token.decode('UTF-8')})
+        public_id = client.public_id
+        output_data = {}
+        output_data['token']= token.decode('UTF-8')
+        output_data['public_id'] = public_id
+        return jsonify(output_data)
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
