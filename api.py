@@ -434,51 +434,6 @@ def paid_invoice(invoice_id):
 
 ######################################LOGIN######################################################################
 
-@app.route('/api/login/admin', methods=['GET','POST'])
-def login_admin():
-    data = request.get_json()
-
-    if not data or not data['email'] or not data['password']:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    admin = session.query(Admin).filter_by(admin_email=data['email']).first()
-
-    if not admin:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    if check_password_hash(admin.password, data['password']):
-        token = jwt.encode({'public_id' : admin.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        public_id = admin.public_id
-        output_data = {}
-        output_data['token'] = token.decode('UTF-8')
-        output_data['public_id'] = public_id
-        return jsonify(output_data)
-
-    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-@app.route('/api/login', methods=['GET','POST'])
-def login():
-    auth = request.get_json()
-
-    if not auth or not auth['email'] or not auth['password']:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    client = session.query(Client).filter_by(client_email=auth['email']).first()
-
-    if not client:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
-
-    if check_password_hash(client.password, auth['password']):
-        token = jwt.encode({'public_id' : client.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        # resp = make_response()
-        # resp.headers.extend({'x-access-token' : client_data['token']})
-        public_id = client.public_id
-        output_data = {}
-        output_data['token']= token.decode('UTF-8')
-        output_data['public_id'] = public_id
-        return jsonify(output_data)
-
-    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
 ######################################USERS######################################################################
 @app.route('/api/<public_id>/clients', methods=['GET'])
@@ -676,6 +631,51 @@ def update_quotation(public_id, quote_id):
     #         return jsonify({'message': 'Not priveledge to use that promo'})
         
         
+@app.route('/api/login/admin', methods=['POST'])
+def login_admin():
+    data = request.get_json()
+
+    if not data or not data['email'] or not data['password']:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    admin = session.query(Admin).filter_by(admin_email=data['email']).first()
+
+    if not admin:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    if check_password_hash(admin.password, data['password']):
+        token = jwt.encode({'public_id' : admin.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        public_id = admin.public_id
+        output_data = {}
+        output_data['token'] = token.decode('UTF-8')
+        output_data['public_id'] = public_id
+        return jsonify(output_data)
+
+    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+@app.route('/api/login', methods=['GET','POST'])
+def login():
+    auth = request.get_json()
+
+    if not auth or not auth['email'] or not auth['password']:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    client = session.query(Client).filter_by(client_email=auth['email']).first()
+
+    if not client:
+        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+
+    if check_password_hash(client.password, auth['password']):
+        token = jwt.encode({'public_id' : client.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+        # resp = make_response()
+        # resp.headers.extend({'x-access-token' : client_data['token']})
+        public_id = client.public_id
+        output_data = {}
+        output_data['token']= token.decode('UTF-8')
+        output_data['public_id'] = public_id
+        return jsonify(output_data)
+
+    return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
     
 
 if __name__ == '__main__':
