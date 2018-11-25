@@ -497,7 +497,7 @@ def request_quotation(public_id):
     client = session.query(Client).filter_by(public_id=public_id).first()
     is_package = True
     package_id = 0
-    if data['package'] == "No package":
+    if data['package'] == "no package":
         is_package = False
         package_id = 1
     
@@ -552,14 +552,15 @@ def request_quotation(public_id):
 @app.route('/api/<public_id>/quotation/<quote_id>', methods=['GET'])
 def view_quotation(public_id, quote_id):
     client = session.query(Client).filter_by(public_id=public_id).first()
-    quotation = (session.query(Quotation).filter_by(quote_id=quote_id)
-                                        .filter_by(client_id=client.client_id)).first()
+    quotation = session.query(Quotation).filter_by(quote_id=quote_id).first()
     output_data = {}
     total = 0
+    
+    if not client:
+        return jsonify({'message': "no client"})
+
     if not quotation:
         return jsonify({'message': "no quotation"})
-        
-   
 
     output_data['quote_id'] = quotation.quote_id
     output_data['quote_validity'] = quotation.quote_validity
@@ -583,14 +584,18 @@ def view_quotation(public_id, quote_id):
         output_data['quotation_details'].append(quotation_details_data)
         total += (quotation_detail.unit_price * quotation_detail.qty)
 
-
-    invoice = session.query(Invoice).filter_by(quote_id=quote_id).one()
     
+    invoice = session.query(Invoice).filter_by(quote_id=quote_id).first()
     if invoice:
         output_data['invoice_no'] = invoice.invoice_no
         output_data['invoice_id'] = invoice.invoice_id
         output_data['status'] = invoice.paid
         output_data['date_created'] = invoice.date_created
+    else:
+        output_data['invoice_no'] = ""
+        output_data['invoice_id'] = ""
+        output_data['status'] = ""
+        output_data['date_created'] = ""
         
     
     output_data['total_sales'] = total
