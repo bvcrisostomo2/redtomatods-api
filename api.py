@@ -441,7 +441,7 @@ def login_admin():
     if not data or not data['email'] or not data['password']:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-    admin = session.query(Client).filter_by(admin_email=data['email']).first()
+    admin = session.query(Admin).filter_by(admin_email=data['email']).first()
 
     if not admin:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
@@ -463,7 +463,7 @@ def login():
     if not auth or not auth['email'] or not auth['password']:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
-    client = session.query(Client).filter_by(email=auth['email']).first()
+    client = session.query(Client).filter_by(client_email=auth['email']).first()
 
     if not client:
         return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
