@@ -535,7 +535,7 @@ def request_quotation(public_id):
         #                                 quote_id = quote.quote_id)
         # session.add(new_quote_det)
         # session.commit()
-    for desc, qty, service_type, service in zip(data['desc'],data['qty'],data['type'],data['service']):
+    for desc, qty, service_type, service in zip(data['description'],data['qty'],data['type'],data['service']):
         service = (session.query(Service).filter_by(service_name=service)
                                         .filter_by(service_cat=service_type)).first()
         
