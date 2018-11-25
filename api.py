@@ -541,8 +541,9 @@ def request_quotation(public_id):
     generate = str(uuid.uuid4())
     client = session.query(Client).filter_by(public_id=public_id).first()
     is_package = True
-    if data['package_id'] == 1:
+    if data['package'] == "No package":
         is_package = False
+        package_id = 1
     
     off = 0
 
@@ -559,7 +560,7 @@ def request_quotation(public_id):
                               client_id = client.client_id,
                               quote_validity = datetime.datetime.now() + timedelta(days=7),
                               quote_status = "For Approval",
-                              package_id = data['package_id'],
+                              package_id = package_id,
                               is_package = is_package,
                               last_updated = datetime.datetime.now(),
                               generated_id = generate,
