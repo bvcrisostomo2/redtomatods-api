@@ -113,7 +113,7 @@ def view_dashboard():
 
 #GET ALL
 #@token_required_admin
-@app.route('/api/clients/', methods=['GET'])
+@app.route('/api/clients', methods=['GET'])
 #def get_all_clients(current_user):
 def get_all_clients():
     # if not current_user.admin:
@@ -231,19 +231,18 @@ def get_quotation(quote_id):
         quotation_details_data['unit_price'] = quotation_detail.unit_price
         quotation_details_data['service_id'] = quotation_detail.service_id
         quotation_details_data['quote_id'] = quotation_detail.quote_id
+        quotation_details_data['sub_total'] = quotation_detail.qty * quotation_detail.unit_price
         output_data['quotation_details'].append(quotation_details_data)
         total += (quotation_detail.unit_price * quotation_detail.qty)
 
     invoice = session.query(Invoice).filter_by(quote_id=quote_id).first()
+    invoice_data={}
     if invoice:
-        invoice_data={}
         invoice_data['invoice_no'] = invoice.invoice_no
         invoice_data['invoice_id'] = invoice.invoice_id
         invoice_data['status'] = invoice.paid
         invoice_data['date_created'] = invoice.date_created
-        
     else:
-        invoice_data={}
         invoice_data['invoice_no'] = ""
         invoice_data['invoice_id'] = ""
         invoice_data['status'] = ""
@@ -480,10 +479,8 @@ def paid_invoice(invoice_id):
 
     return jsonify({'message' : 'Client has paid'})
 
-######################################LOGIN######################################################################
-
-
 ######################################USERS######################################################################
+
 @app.route('/api/<public_id>/clients', methods=['GET'])
 def client_profile(public_id):
 
