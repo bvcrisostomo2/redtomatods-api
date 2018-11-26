@@ -268,6 +268,9 @@ def update_quote_status(quote_id):
     if not quote:
         return jsonify({'message' : 'No quote found!'})
 
+    if quote.quote_status == "Rejected":
+        return jsonify({'message' : 'Cannot be approved!'})
+        
     if quote.quote_status == "Approved by Admin":
         return jsonify({'message':"Already approved by admin"})
 
@@ -295,6 +298,12 @@ def reject_quote_status(quote_id):
     if not quote:
         return jsonify({'message' : 'No quote found!'})
 
+    if quote.quote_status == "Approved by both":
+        return jsonify({'message' : 'Cannot be rejected'})
+
+    if quote.quote_status == "Approved by admin":
+        return jsonify({'message' : 'Cannot be rejected'})
+        
     if quote.quote_status == "For Approval":
         quote.quote_status = "Rejected"
         quote.quote_validity = datetime.datetime.now() + timedelta(days=7)
@@ -647,6 +656,8 @@ def update_quotation(public_id, quote_id):
     
     if not quote:
         return jsonify({'message' : 'No quote found!'})
+    if quote.quote_status == "Rejected":
+        return jsonify({'message' : 'Cannot be approved!'})
 
     if quote.quote_status == "Approved by Admin":
         quote.quote_status = "Approved by both"
