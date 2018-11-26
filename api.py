@@ -444,9 +444,11 @@ def get_all_admins():
 
 @app.route('/api/invoice/<invoice_id>', methods=['PUT'])
 def paid_invoice(invoice_id):
-    invoice = session.query(Invoice).first()
+    invoice = session.query(Invoice).filter_by(invoice_id=invoice_id).first()
     invoice.paid = "Paid"
     session.commit()
+
+    return jsonify({'message' : 'Client has paid'})
 
 ######################################LOGIN######################################################################
 
