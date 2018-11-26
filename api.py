@@ -202,14 +202,15 @@ def get_quotation(quote_id):
     #     return jsonify({'message' : 'Cannot perform that function!'})
 
     quotation = session.query(Quotation).filter_by(quote_id=quote_id).first()
+
+    if not quotation:
+        return jsonify({'message': "no quotation"})
+
     client = session.query(Client).filter_by(client_id=quotation.client_id).first()
     
     output_data = {}
     total = 0
-    if not quotation:
-        return jsonify({'message': "no quotation"})
-        
-
+    
     output_data['quote_id'] = quotation.quote_id
     output_data['quote_validity'] = quotation.quote_validity
     output_data['date_created'] = quotation.date_created
@@ -232,14 +233,21 @@ def get_quotation(quote_id):
         output_data['quotation_details'].append(quotation_details_data)
         total += (quotation_detail.unit_price * quotation_detail.qty)
 
-    invoice = session.query(Invoice).filter_by(quote_id=quote_id).one()
-    invoice_data={}
+    invoice = session.query(Invoice).filter_by(quote_id=quote_id).first()
     if invoice:
+        invoice_data={}
         invoice_data['invoice_no'] = invoice.invoice_no
         invoice_data['invoice_id'] = invoice.invoice_id
         invoice_data['status'] = invoice.paid
         invoice_data['date_created'] = invoice.date_created
         
+    else:
+        invoice_data={}
+        invoice_data['invoice_no'] = ""
+        invoice_data['invoice_id'] = ""
+        invoice_data['status'] = ""
+        invoice_data['date_created'] = ""
+
     output_data['invoice'] = invoice_data
     output_data['total_sales'] = total
     output_data['company_name'] = client.company_name
@@ -389,8 +397,8 @@ def create_client():
     #     return jsonify({'message' : 'Cannot perform that function!'})
 
     data = request.get_json()
-    password = (data['lastname'].replace(" ","")).lower() + "123"
-    hashed_password = generate_password_hash(password, method='sha256')
+    # password = (data['lastname'].replace(" ","")).lower() + "123"
+    hashed_password = generate_password_hash(data['password'], method='sha256')
 
     new_client = Client(public_id=str(uuid.uuid4()),  
                         client_firstname=data['firstname'],
@@ -532,17 +540,6 @@ def request_quotation(public_id):
     session.add(new_quotation)
     session.commit()
     quote = session.query(Quotation).filter_by(generated_id=generate).first()
-    # for quote_det in data["quotation_details"]:
-        # service = (session.query(Service).filter_by(service_name=quote_det['service_name'])
-        #                                  .filter_by(service_cat=quote_det['service_type'])).first()
-        
-        # new_quote_det = QuotationDetail(desc = quote_det['desc'],
-        #                                 qty = quote_det['qty'],
-        #                                 unit_price = service.base_price * (1-off),
-        #                                 service_id = service.service_id,
-        #                                 quote_id = quote.quote_id)
-        # session.add(new_quote_det)
-        # session.commit()
     for desc, qty, service_type, service in zip(data['description'],data['qty'],data['type'],data['service']):
         print(service_type)
         print(service)
@@ -552,6 +549,7 @@ def request_quotation(public_id):
         print(service.service_cat)
         if not service:
             return jsonify({'message':'no service'})
+
         new_quote_det = QuotationDetail(desc = desc,
                                         qty = qty,
                                         unit_price = (service.base_price * (1-off)),
