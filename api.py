@@ -337,22 +337,31 @@ def view_invoice(invoice_no):
 
 @app.route('/api/service', methods=['GET'])
 def request_service():
-    services = session.query(Service).all()
-    output_data= {}
+    # services = session.query(Service).all()
+    # output_data= {}
     
-    service_names = []
-    for service in services:
-        service_names.append(service.service_name)
+    # service_names = []
+    # for service in services:
+    #     service_names.append(service.service_name)
     
-    service_names = list(set(service_names))
-    output_data['service_name'] = service_names
-    for service_name in service_names:
-        services = session.query(Service).filter_by(service_name=service_name).all()
-        service_cats = []
-        for service in services:
-            service_cats.append(service.service_cat)
+    # service_names = list(set(service_names))
+    # output_data['service_name'] = service_names
+    # for service_name in service_names:
+    #     services = session.query(Service).filter_by(service_name=service_name).all()
+    #     service_cats = []
+    #     for service in services:
+    #         service_cats.append(service.service_cat)
             
-        output_data[service_name] = service_cats
+    #     output_data[service_name] = service_cats
+
+    services = session.query(Service).all()
+    output_data = {}
+    servicelist = []
+    for service in services:
+        serve = service.service_name + "," + service.service_type
+        servicelist.append(serve)
+    
+    output_data['services'] = servicelist
 
     return jsonify(output_data)
 
