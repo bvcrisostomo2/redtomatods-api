@@ -674,23 +674,40 @@ def login_admin():
 def login():
     auth = request.get_json()
 
-    if not auth or not auth['email'] or not auth['password']:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    # if not auth or not auth['email'] or not auth['password']:
+    #     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
 
     client = session.query(Client).filter_by(client_email=auth['email']).first()
+    admin = session.query(Admin).filter_by(admin_email=auth['email']).first()
 
     if not client:
-        return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+        if not admin:
+            return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
+    
+    if client:
+        if check_password_hash(client.password, auth['password']):
+            token = jwt.encode({'public_id' : client.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+            # resp = make_response()
+            # resp.headers.extend({'x-access-token' : client_data['token']})
+            public_id = client.public_id
+            output_data = {}
+            output_data['token']= token.decode('UTF-8')
+            output_data['public_id'] = public_id
+            output_data['admin'] = client.admin
 
-    if check_password_hash(client.password, auth['password']):
-        token = jwt.encode({'public_id' : client.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
-        # resp = make_response()
-        # resp.headers.extend({'x-access-token' : client_data['token']})
-        public_id = client.public_id
-        output_data = {}
-        output_data['token']= token.decode('UTF-8')
-        output_data['public_id'] = public_id
-        return jsonify(output_data)
+            return jsonify(output_data)
+
+    if admin:
+        if check_password_hash(admin.password, auth['password']):
+            token = jwt.encode({'public_id' : admin.public_id, 'exp' : datetime.datetime.utcnow() + datetime.timedelta(minutes=30)}, app.config['SECRET_KEY'])
+            # resp = make_response()
+            # resp.headers.extend({'x-access-token' : client_data['token']})
+            public_id = admin.public_id
+            output_data = {}
+            output_data['token']= token.decode('UTF-8')
+            output_data['public_id'] = public_id
+            output_data['admin'] = admin.admin
+            return jsonify(output_data)
 
     return make_response('Could not verify', 401, {'WWW-Authenticate' : 'Basic realm="Login required!"'})
     

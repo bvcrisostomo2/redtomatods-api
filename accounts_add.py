@@ -17,49 +17,54 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
-hashed_password = generate_password_hash("123456", method='sha256')
-new_admin = Admin(public_id=str(uuid.uuid4()),
-                     admin_firstname="Ragine",
-                     admin_lastname="Tumulak",
-                     admin_email="ragine_tumulak@gmail.com",
-                     date_created=datetime.datetime.now(),
-                     last_update=datetime.datetime.now(),
-                     password=hashed_password, 
-                     admin=True)
-session.add(new_admin)
+# hashed_password = generate_password_hash("123456", method='sha256')
+# new_admin = Admin(public_id=str(uuid.uuid4()),
+#                      admin_firstname="Ragine",
+#                      admin_lastname="Tumulak",
+#                      admin_email="ragine_tumulak@gmail.com",
+#                      date_created=datetime.datetime.now(),
+#                      last_update=datetime.datetime.now(),
+#                      password=hashed_password, 
+#                      admin=True)
+# session.add(new_admin)
+
+# hashed_password = generate_password_hash('OMG123', method='sha256')
+
+# new_client = Client(public_id=str(uuid.uuid4()),  
+#                     client_firstname="Zhellah",
+#                     client_lastname="Punzalan",
+#                     client_email= "omg@gmail.com",
+#                     company_name = "Oil My Goodness",
+#                     client_landline="None",
+#                     client_mobile="None",
+#                     client_fax="None",
+#                     client_address="Caloocan",
+#                     date_created=datetime.datetime.now(),
+#                     date_updated=datetime.datetime.now(),
+#                     password=hashed_password, 
+#                     admin=False)
+# session.add(new_client)
+
+# hashed_password2 = generate_password_hash('OMG123', method='sha256')
+
+# new_client2 = Client(public_id=str(uuid.uuid4()),  
+#                     client_firstname="Zhellah",
+#                     client_lastname="Punzalan",
+#                     client_email= "zeephora@gmail.com",
+#                     company_name = "Zeephora",
+#                     client_landline="None",
+#                     client_mobile="None",
+#                     client_fax="None",
+#                     client_address="Caloocan",
+#                     date_created=datetime.datetime.now(),
+#                     date_updated=datetime.datetime.now(),
+#                     password=hashed_password, 
+#                     admin=False)
+# session.add(new_client2)
+
+# session.commit()
+
 
 hashed_password = generate_password_hash('OMG123', method='sha256')
-
-new_client = Client(public_id=str(uuid.uuid4()),  
-                    client_firstname="Zhellah",
-                    client_lastname="Punzalan",
-                    client_email= "omg@gmail.com",
-                    company_name = "Oil My Goodness",
-                    client_landline="None",
-                    client_mobile="None",
-                    client_fax="None",
-                    client_address="Caloocan",
-                    date_created=datetime.datetime.now(),
-                    date_updated=datetime.datetime.now(),
-                    password=hashed_password, 
-                    admin=False)
-session.add(new_client)
-
-hashed_password2 = generate_password_hash('OMG123', method='sha256')
-
-new_client2 = Client(public_id=str(uuid.uuid4()),  
-                    client_firstname="Zhellah",
-                    client_lastname="Punzalan",
-                    client_email= "zeephora@gmail.com",
-                    company_name = "Zeephora",
-                    client_landline="None",
-                    client_mobile="None",
-                    client_fax="None",
-                    client_address="Caloocan",
-                    date_created=datetime.datetime.now(),
-                    date_updated=datetime.datetime.now(),
-                    password=hashed_password, 
-                    admin=False)
-session.add(new_client2)
-
-session.commit()
+omg = session.query(Client).filter_by(client_email='omg@gmail.com').first()
+print (omg)
