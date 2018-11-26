@@ -165,10 +165,10 @@ def view_client(public_id):
         quotation_data['quote_id'] = quotation.quote_id
         quotation_data['client_id'] = quotation.client_id
         quotation_data['quote_validity'] = quotation.quote_validity
-        # quotation_data['data_created'] = quotation.date_created
+        quotation_data['data_created'] = quotation.date_created
         quotation_data['is_package'] = quotation.is_package
         quotation_data['package_id'] = quotation.package_id
-        # quotation_data['last_updated'] = quotation.last_updated
+        quotation_data['last_updated'] = quotation.last_updated
         quotation_data['generated_id'] = quotation.generated_id
         quotation_data['quote_status'] = quotation.quote_status
         quotation_list.append(quotation_data)
