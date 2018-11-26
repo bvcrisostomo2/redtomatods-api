@@ -282,6 +282,26 @@ def update_quote_status(quote_id):
 
     return jsonify({'message' : 'The quotation has been updated!'})
 
+@app.route('/api/quotation/<quote_id>/reject', methods=['PUT'])
+# @token_required_admin
+# def update_quotation_status(current_user, quote_id):
+def update_quote_status(quote_id):
+    
+    # if not current_user.admin:
+    #     return jsonify({'message' : 'Cannot perform that function!'})
+
+    quote = session.query(Quotation).filter_by(quote_id=quote_id).first()
+    
+    if not quote:
+        return jsonify({'message' : 'No quote found!'})
+
+    if quote.quote_status == "For Approval":
+        quote.quote_status = "Rejected"
+        quote.quote_validity = datetime.datetime.now() + timedelta(days=7)
+        session.commit()
+
+    return jsonify({'message' : 'The quotation has been rejected!'})
+
 @app.route('/api/invoice/<invoice_no>', methods=['GET'])
 # @token_required_admin
 # def view_invoice(current_user, invoice_no):
