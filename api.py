@@ -428,7 +428,7 @@ def create_admin():
 
     return jsonify({'message': 'New admin created!'})
 
-@app.route('/api/clients', methods=['POST'])
+@app.route('/api/clients/', methods=['POST'])
 # @token_required_admin
 # def create_client(current_user):
 def create_client():
@@ -579,12 +579,16 @@ def request_quotation(public_id):
     session.commit()
     quote = session.query(Quotation).filter_by(generated_id=generate).first()
     for desc, qty, service_type, service in zip(data['description'],data['qty'],data['type'],data['service']):
-        print(service_type)
-        print(service)
+    # for desc, qty, service in zip(data['description'],data['qty'],data['service']):
+        # print(service_type)
+        # print(service)
         # service_type = service name
         # service = service cat
+        # service_type = service.split(',')[1]
+        # service_cat = service.split(',')[0]
+
         service = (session.query(Service).filter_by(service_name=service_type).filter_by(service_cat=service)).first()
-        print(service.service_cat)
+        # print(service.service_cat)
         if not service:
             return jsonify({'message':'no service'})
 
