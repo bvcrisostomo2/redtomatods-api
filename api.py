@@ -165,10 +165,10 @@ def view_client(public_id):
         quotation_data['quote_id'] = quotation.quote_id
         quotation_data['client_id'] = quotation.client_id
         quotation_data['quote_validity'] = quotation.quote_validity
-        quotation_data['data_created'] = quotation.date_created
+        # quotation_data['data_created'] = quotation.date_created
         quotation_data['is_package'] = quotation.is_package
         quotation_data['package_id'] = quotation.package_id
-        quotation_data['last_updated'] = quotation.last_updated
+        # quotation_data['last_updated'] = quotation.last_updated
         quotation_data['generated_id'] = quotation.generated_id
         quotation_data['quote_status'] = quotation.quote_status
         quotation_list.append(quotation_data)
@@ -182,7 +182,7 @@ def view_client(public_id):
             invoice_data = {}            
             invoice_data['invoice_id'] = invoice.invoice_id
             invoice_data['invoice_no'] = invoice.invoice_no
-            invoice_data['date_created'] = invoice.date_created
+            # invoice_data['date_created'] = invoice.date_created
             invoice_data['quote_id'] = invoice.quote_id
             invoice_data['total price'] = total
             invoice_list.append(invoice_data)
@@ -259,9 +259,17 @@ def update_quote_status(quote_id):
     if not quote:
         return jsonify({'message' : 'No quote found!'})
 
-    quote.quote_status = "Approved by Admin"
-    quote.quote_validity = datetime.datetime.now() + timedelta(days=7)
-    session.commit()
+    if quote.quote_status == "Approved by Admin":
+        return jsonify({'message':"Already approved by admin"})
+
+    if quote.quote_status == "Approved by Both":
+        return jsonify({'message':"Already approved by both"})
+
+    if quote.quote_status == "For Approval":
+        quote.quote_status = "Approved by Admin"
+        quote.quote_validity = datetime.datetime.now() + timedelta(days=7)
+        session.commit()
+    
 
     return jsonify({'message' : 'The quotation has been updated!'})
 
@@ -536,12 +544,17 @@ def request_quotation(public_id):
         # session.add(new_quote_det)
         # session.commit()
     for desc, qty, service_type, service in zip(data['description'],data['qty'],data['type'],data['service']):
-        service = (session.query(Service).filter_by(service_name=service)
-                                        .filter_by(service_cat=service_type)).first()
-        
+        print(service_type)
+        print(service)
+        # service_type = service name
+        # service = service cat
+        service = (session.query(Service).filter_by(service_name=service_type).filter_by(service_cat=service)).first()
+        print(service.service_cat)
+        if not service:
+            return jsonify({'message':'no service'})
         new_quote_det = QuotationDetail(desc = desc,
                                         qty = qty,
-                                        unit_price = service.base_price * (1-off),
+                                        unit_price = (service.base_price * (1-off)),
                                         service_id = service.service_id,
                                         quote_id = quote.quote_id)
         session.add(new_quote_det)
