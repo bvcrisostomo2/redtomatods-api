@@ -182,7 +182,7 @@ def view_client(public_id):
             invoice_data = {}            
             invoice_data['invoice_id'] = invoice.invoice_id
             invoice_data['invoice_no'] = invoice.invoice_no
-            # invoice_data['date_created'] = invoice.date_created
+            invoice_data['date_created'] = invoice.date_created
             invoice_data['quote_id'] = invoice.quote_id
             invoice_data['total_price'] = total
             invoice_data['status'] = invoice.paid
@@ -508,7 +508,7 @@ def client_profile(public_id):
         quotation_data['quote_id'] = quotation.quote_id
         quotation_data['client_id'] = quotation.client_id
         quotation_data['quote_validity'] = quotation.quote_validity
-        quotation_data['data_created'] = quotation.date_created
+        quotation_data['date_created'] = quotation.date_created
         quotation_data['is_package'] = quotation.is_package
         quotation_data['package_id'] = quotation.package_id
         quotation_data['last_updated'] = quotation.last_updated
