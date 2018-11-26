@@ -285,7 +285,7 @@ def update_quote_status(quote_id):
 @app.route('/api/quotation/<quote_id>/reject', methods=['PUT'])
 # @token_required_admin
 # def update_quotation_status(current_user, quote_id):
-def update_quote_status(quote_id):
+def reject_quote_status(quote_id):
     
     # if not current_user.admin:
     #     return jsonify({'message' : 'Cannot perform that function!'})
