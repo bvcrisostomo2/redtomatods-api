@@ -270,7 +270,7 @@ def update_quote_status(quote_id):
 
     if quote.quote_status == "Rejected":
         return jsonify({'message' : 'Cannot be approved!'})
-        
+
     if quote.quote_status == "Approved by Admin":
         return jsonify({'message':"Already approved by admin"})
 
