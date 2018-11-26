@@ -340,19 +340,19 @@ def request_service():
     services = session.query(Service).all()
     output_data= {}
     
-    service_cats = []
+    service_names = []
     for service in services:
-        service_cats.append(service.service_cat)
+        service_names.append(service.service_name)
     
-    service_cats = list(set(service_cats))
-    output_data['service_cats'] = service_cats
-    for service_cat in service_cats:
-        services = session.query(Service).filter_by(service_cat=service_cat).all()
-        service_names = []
+    service_names = list(set(service_names))
+    output_data['service_name'] = service_names
+    for service_name in service_names:
+        services = session.query(Service).filter_by(service_name=service_name).all()
+        service_cats = []
         for service in services:
-            service_names.append(service.service_name)
+            service_cats.append(service.service_cat)
             
-        output_data[service_cat] = service_names
+        output_data[service_name] = service_cats
 
     return jsonify(output_data)
 
@@ -370,6 +370,7 @@ def get_all_services():
         service_data['base_price']=service.base_price
         output_data['services'] = service_data
         servicelist.append(service_data)
+    
     output_data["services"] = servicelist
 
     return jsonify(output_data)
