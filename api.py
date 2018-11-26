@@ -500,7 +500,6 @@ def client_profile(public_id):
     quotation_list = []
     #resets every loop
 
-
     invoice_list = []
      #resets every loop
 
@@ -528,10 +527,9 @@ def client_profile(public_id):
             invoice_data['invoice_no'] = invoice.invoice_no
             invoice_data['date_created'] = invoice.date_created
             invoice_data['quote_id'] = invoice.quote_id
-            invoice_data['total price'] = total
+            invoice_data['total_price'] = total
             invoice_data['paid'] = invoice.paid
             invoice_list.append(invoice_data)
-
 
         output_data['client'] = client_list
         output_data['quotations'] = quotation_list
