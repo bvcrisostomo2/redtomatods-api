@@ -615,7 +615,7 @@ def view_quotation(public_id, quote_id):
         quotation_data['quote_id'] = quotation.quote_id
         quotation_data['client_id'] = quotation.client_id
         quotation_data['quote_validity'] = quotation.quote_validity
-        quotation_data['data_created'] = quotation.date_created
+        quotation_data['date_created'] = quotation.date_created
         quotation_data['is_package'] = quotation.is_package
         quotation_data['package_id'] = quotation.package_id
         quotation_data['last_updated'] = quotation.last_updated
