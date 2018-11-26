@@ -428,9 +428,10 @@ def create_admin():
 
     return jsonify({'message': 'New admin created!'})
 
-@app.route('/api/clients/', methods=['POST'])
+
 # @token_required_admin
 # def create_client(current_user):
+@app.route('/api/clients', methods=['POST'])
 def create_client():
     # if not current_user.admin:
     #     return jsonify({'message' : 'Cannot perform that function!'})
