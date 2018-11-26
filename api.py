@@ -595,55 +595,55 @@ def request_quotation(public_id):
 
 @app.route('/api/<public_id>/quotation/<quote_id>', methods=['GET'])
 def view_quotation(public_id, quote_id):
-    client = session.query(Client).filter_by(public_id=public_id).first()
-    quotation = session.query(Quotation).filter_by(quote_id=quote_id).first()
+    # projects = session.query(Project).all()
+    client = session.query(Client).filter_by(public_id=public_id).one()
+    quotations = session.query(Quotation).filter_by(client_id=client.client_id).all()
+
     output_data = {}
-    total = 0
-    
-    if not client:
-        return jsonify({'message': "no client"})
+    client_list = []
+    client_data = {}
+    client_data['company_name'] = client.company_name
+    client_list.append(client_data)
 
-    if not quotation:
-        return jsonify({'message': "no quotation"})
+    quotation_list = []
+    #resets every loop
 
-    output_data['quote_id'] = quotation.quote_id
-    output_data['quote_validity'] = quotation.quote_validity
-    output_data['date_created'] = quotation.date_created
-    output_data['is_package'] = quotation.is_package
-    output_data['quote_status'] = quotation.quote_status
-    output_data['package_id'] = quotation.package_id
-    output_data['last_updated'] = quotation.last_updated
-    output_data['generated_id'] = quotation.generated_id
-      
-    quotation_details = session.query(QuotationDetail).filter_by(quote_id=quotation.quote_id).all()
-      
-    output_data['quotation_details'] = []
-    for quotation_detail in quotation_details:
-        quotation_details_data = {}
-        quotation_details_data['desc'] = quotation_detail.desc
-        quotation_details_data['qty'] = quotation_detail.qty
-        quotation_details_data['unit_price'] = quotation_detail.unit_price
-        quotation_details_data['service_id'] = quotation_detail.service_id
-        quotation_details_data['quote_id'] = quotation_detail.quote_id
-        output_data['quotation_details'].append(quotation_details_data)
-        total += (quotation_detail.unit_price * quotation_detail.qty)
 
-    
-    invoice = session.query(Invoice).filter_by(quote_id=quote_id).first()
-    if invoice:
-        output_data['invoice_no'] = invoice.invoice_no
-        output_data['invoice_id'] = invoice.invoice_id
-        output_data['status'] = invoice.paid
-        output_data['date_created'] = invoice.date_created
-    else:
-        output_data['invoice_no'] = ""
-        output_data['invoice_id'] = ""
-        output_data['status'] = ""
-        output_data['date_created'] = ""
-        
-    
-    output_data['total_sales'] = total
-    output_data['company_name'] = client.company_name
+    invoice_list = []
+     #resets every loop
+
+    for quotation in quotations:
+        quotation_data = {} 
+        quotation_data['quote_id'] = quotation.quote_id
+        quotation_data['client_id'] = quotation.client_id
+        quotation_data['quote_validity'] = quotation.quote_validity
+        quotation_data['data_created'] = quotation.date_created
+        quotation_data['is_package'] = quotation.is_package
+        quotation_data['package_id'] = quotation.package_id
+        quotation_data['last_updated'] = quotation.last_updated
+        quotation_data['generated_id'] = quotation.generated_id
+        quotation_data['quote_status'] = quotation.quote_status
+        quotation_list.append(quotation_data)
+
+        invoices = session.query(Invoice).filter_by(quote_id=quotation.quote_id).all()
+        for invoice in invoices:
+            quotation_details = session.query(QuotationDetail).filter_by(quote_id=invoice.quote_id).all()
+            total = 0
+            for quotation_detail in quotation_details:
+                total += quotation_detail.unit_price * quotation_detail.qty
+            invoice_data = {}            
+            invoice_data['invoice_id'] = invoice.invoice_id
+            invoice_data['invoice_no'] = invoice.invoice_no
+            invoice_data['date_created'] = invoice.date_created
+            invoice_data['quote_id'] = invoice.quote_id
+            invoice_data['total price'] = total
+            invoice_data['paid'] = invoice.paid
+            invoice_list.append(invoice_data)
+
+
+        output_data['client'] = client_list
+        output_data['quotations'] = quotation_list
+        output_data['invoices'] = invoice_list
         
     return jsonify(output_data)
     
@@ -656,13 +656,17 @@ def update_quotation(public_id, quote_id):
     
     if not quote:
         return jsonify({'message' : 'No quote found!'})
-    if quote.quote_status == "Rejected":
+        
+    if (quote.quote_status == "Rejected"):
         return jsonify({'message' : 'Cannot be approved!'})
-
-    if quote.quote_status == "Approved by Admin":
+    
+    if (quote.quote_status == "Approved by Admin"):
         quote.quote_status = "Approved by both"
         session.commit()
         return jsonify({'message' : 'The quotation has been updated!'})
+    
+    if(quote.quote_status == 'Approved by both'):
+        return jsonify({'message' : 'Already approved by both'})
     else:
         return jsonify({'message' : "Quotation status has not yet been approved by admin"})
     
