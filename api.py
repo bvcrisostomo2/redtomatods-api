@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, make_response, Response
+from flask import Flask, request, jsonify, make_response, Response, url_for, flash, redirect, render_template
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -11,12 +11,22 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from datetime import timedelta
 import operator 
+from itsdangerous import URLSafeTimedSerializer
+import smtplib
+import smtplib
+from string import Template
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'rtds-secretkey'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'rtds_db.db'
-
+app.config['SECURITY_PASSWORD_SALT'] = 'my_precious_two'
+# app.config['MAIL_DEFAULT_SENDER'] = "rtds.confimation.email"
+# app.config['MAIL_DEFAULT_PASSWORD'] = "rtds0911"
+app.config['MAIL_DEFAULT_SENDER'] = "redtomato.designstudio"
+app.config['MAIL_DEFAULT_PASSWORD'] = "RTDSpulangkamatis09"
 engine = create_engine('sqlite:///rtds_db.db')
 Base.metadata.bind = engine
 
@@ -428,10 +438,59 @@ def create_admin():
 
     return jsonify({'message': 'New admin created!'})
 
+def generate_confirmation_token(email):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    return serializer.dumps(email, salt=app.config['SECURITY_PASSWORD_SALT'])
+
+def confirm_token(token, expiration=3600):
+    serializer = URLSafeTimedSerializer(app.config['SECRET_KEY'])
+    try:
+        email = serializer.loads(
+            token,
+            salt=app.config['SECURITY_PASSWORD_SALT'],
+            max_age=expiration
+        )
+    except:
+        return False
+    return email
+
+@app.route('/confirm/<token>')
+def confirm_email(token):
+    try:
+        email = confirm_token(token)
+    except:
+        flash('The confirmation link is invalid or has expired.', 'danger')
+    user = session.query(Client).filter_by(client_email=email).first()
+    
+    if user.confirmed:
+        flash('Account already confirmed. Please login.', 'success')
+    else:
+        user.confirmed = True
+        user.confirmed_on = datetime.datetime.now()
+        session.add(user)
+        session.commit()
+        flash('You have confirmed your account. Thanks!', 'success')
+    return redirect(url_for('/'))
+
+def send_email(to, subject, template):
+    # s = smtplib.SMTP(host='smtp.gmail.com', port=465)
+    s = smtplib.SMTP('smtp.gmail.com:587')
+    s.ehlo() 
+    s.starttls()
+    s.login(app.config['MAIL_DEFAULT_SENDER'] , app.config['MAIL_DEFAULT_PASSWORD'])
+    msg = MIMEMultipart('alternative')
+
+    msg['From']= "redtomato.designstudio@gmail.com"
+    msg['To']= to
+    msg['Subject']= subject
+    message_string = "Click the url to confirm your account" + " " + str(template)
+    message = 'Subject:{}\n\n{}'.format(subject, message_string)
+    msg.attach(MIMEText(message, 'plain'))
+    s.sendmail(msg['From'], to, message)
 
 # @token_required_admin
 # def create_client(current_user):
-@app.route('/api/client', methods=['POST'])
+@app.route('/api/clients', methods=['POST'])
 def create_client():
     # if not current_user.admin:
     #     return jsonify({'message' : 'Cannot perform that function!'})
@@ -452,11 +511,22 @@ def create_client():
                         date_created=datetime.datetime.now(),
                         date_updated=datetime.datetime.now(),
                         password=hashed_password, 
-                        admin=False)
+                        admin=False,
+                        confirmed=False)
     session.add(new_client)
     session.commit()
 
-    return jsonify({'message': 'New client created!'})
+    token = generate_confirmation_token(data['email'])
+    confirm_url = url_for('confirm_email', token=token, _external=True)
+    html = render_template('activate.html', confirm_url=confirm_url)
+    subject = "Please confirm your email"
+
+    send_email(data['email'], subject, confirm_url)
+
+    flash('A confirmation email has been sent via email.', 'success')
+
+    return jsonify({'message': 'New client created! Needs confirmation'})
+    
 
 @app.route('/api/accounts/', methods=['GET'])
 # @token_required_admin

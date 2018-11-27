@@ -36,6 +36,9 @@ class Client(Base):
     public_id = Column(String(50), unique=True)
     password = Column(String(30))
     admin = Column(Boolean)
+    confirmed = Column(Boolean)
+    confirmed_on = Column(DateTime)
+
 
 class Service(Base):
     __tablename__= 'service'
