@@ -123,7 +123,7 @@ def view_dashboard():
 
 #GET ALL
 #@token_required_admin
-@app.route('/api/clients', methods=['GET'])
+@app.route('/api/clients/', methods=['GET'])
 #def get_all_clients(current_user):
 def get_all_clients():
     # if not current_user.admin:
@@ -470,7 +470,7 @@ def confirm_email(token):
         session.add(user)
         session.commit()
         flash('You have confirmed your account. Thanks!', 'success')
-    return redirect(url_for('/'))
+    return redirect(url_for('login'))
 
 def send_email(to, subject, template):
     # s = smtplib.SMTP(host='smtp.gmail.com', port=465)
